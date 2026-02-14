@@ -15,3 +15,5 @@ export {
   updateDocument,
   deleteDocument,
 } from './firebase';
+
+export {shareHandler, ShareHandler} from './share-handler';

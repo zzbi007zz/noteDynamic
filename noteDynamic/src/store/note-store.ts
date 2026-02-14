@@ -292,6 +292,3 @@ export const useNoteStore = create<NoteState>((set, get) => ({
     }
   },
 }));
-
-// Export hook for components
-export { useNoteStore };

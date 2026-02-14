@@ -56,6 +56,11 @@ export const useScreenshotCapture = (): UseScreenshotCaptureReturn => {
     }
   };
 
+  // Max file size: 10MB
+  const MAX_FILE_SIZE = 10 * 1024 * 1024;
+  // Max dimension: 4096px
+  const MAX_DIMENSION = 4096;
+
   /**
    * Process image picker response
    */
@@ -73,6 +78,21 @@ export const useScreenshotCapture = (): UseScreenshotCaptureReturn => {
     const asset: Asset | undefined = response.assets?.[0];
     if (!asset?.uri) {
       throw new Error('No image selected');
+    }
+
+    // Validate file size
+    if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE) {
+      throw new Error(
+        `Image too large (${Math.round(asset.fileSize / 1024 / 1024)}MB). Maximum size is 10MB.`
+      );
+    }
+
+    // Validate dimensions
+    if ((asset.width && asset.width > MAX_DIMENSION) ||
+        (asset.height && asset.height > MAX_DIMENSION)) {
+      throw new Error(
+        `Image too large (${asset.width}x${asset.height}). Maximum dimension is ${MAX_DIMENSION}px.`
+      );
     }
 
     return {

@@ -246,6 +246,6 @@ export const getSaaSHubUrl = (): string => {
 };
 
 // Get Firebase StackShare URL
-export const getStackShareUrl(): string {
+export const getStackShareUrl = (): string => {
   return `https://stackshare.io/firebase`;
 };

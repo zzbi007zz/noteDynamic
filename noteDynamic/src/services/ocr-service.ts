@@ -5,6 +5,7 @@ export interface OCRResult {
   text: string;
   blocks: TextBlock[];
   confidence: number;
+  isEmpty: boolean; // Indicates if OCR found no text
 }
 
 export interface TextBlock {
@@ -40,6 +41,19 @@ export class OCRService {
     imageUri: string,
     options: OCROptions = {}
   ): Promise<OCRResult> {
+    // Validate input
+    if (!imageUri || typeof imageUri !== 'string') {
+      throw new Error('Invalid image URI provided');
+    }
+
+    // Validate URI format
+    if (!imageUri.startsWith('http://') &&
+        !imageUri.startsWith('https://') &&
+        !imageUri.startsWith('file://') &&
+        !imageUri.startsWith('content://')) {
+      throw new Error('Invalid image URI format. Must be a valid URL or file path.');
+    }
+
     if (this.isProcessing) {
       throw new Error('OCR is already processing. Please wait.');
     }

@@ -24,6 +24,11 @@ interface AuthState {
 }
 
 // Mock authentication functions - replace with actual Firebase implementation
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
 const mockAuth = {
   signIn: async (email: string, password: string): Promise<User> => {
     // Simulate API call
@@ -72,6 +77,26 @@ export const useAuthStore = create<AuthState>()(
       error: null,
 
       signIn: async (email: string, password: string) => {
+        // Validate input
+        if (!email.trim()) {
+          const err = new Error('Email is required');
+          set({ error: err.message });
+          throw err;
+        }
+        if (!password) {
+          const err = new Error('Password is required');
+          set({ error: err.message });
+          throw err;
+        }
+        if (!isValidEmail(email)) {
+          const err = new Error('Invalid email format');
+          set({ error: err.message });
+          throw err;
+        }
+
+        // Prevent concurrent login attempts
+        if (get().isLoading) return;
+
         set({ isLoading: true, error: null });
 
         try {
@@ -92,6 +117,31 @@ export const useAuthStore = create<AuthState>()(
       },
 
       signUp: async (email: string, password: string, displayName: string) => {
+        // Validate input
+        if (!email.trim()) {
+          const err = new Error('Email is required');
+          set({ error: err.message });
+          throw err;
+        }
+        if (!password) {
+          const err = new Error('Password is required');
+          set({ error: err.message });
+          throw err;
+        }
+        if (!isValidEmail(email)) {
+          const err = new Error('Invalid email format');
+          set({ error: err.message });
+          throw err;
+        }
+        if (password.length < 6) {
+          const err = new Error('Password must be at least 6 characters');
+          set({ error: err.message });
+          throw err;
+        }
+
+        // Prevent concurrent signup attempts
+        if (get().isLoading) return;
+
         set({ isLoading: true, error: null });
 
         try {

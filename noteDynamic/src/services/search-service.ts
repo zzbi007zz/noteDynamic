@@ -75,7 +75,28 @@ export class SearchService {
         output: 'json',
       });
 
-      const response = await fetch(`${this.baseUrl}?${params.toString()}`);
+      // Add timeout handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+      let response: Response;
+      try {
+        response = await fetch(`${this.baseUrl}?${params.toString()}`, {
+          signal: controller.signal,
+        });
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        if ((fetchError as Error).name === 'AbortError') {
+          throw new Error('Search request timed out. Please try again.');
+        }
+        throw fetchError;
+      }
+      clearTimeout(timeoutId);
+
+      // Handle rate limiting
+      if (response.status === 429) {
+        throw new Error('Search rate limit exceeded. Please try again later.');
+      }
 
       if (!response.ok) {
         throw new Error(`Search API error: ${response.status} ${response.statusText}`);
