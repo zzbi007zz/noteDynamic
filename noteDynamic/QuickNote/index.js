@@ -431,17 +431,35 @@ function NotesListScreen({ navigation, route }) {
         data={notes}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.noteCard}
-            onPress={() => navigation.navigate('NoteDetail', { note: item })}
-          >
-            <Text style={styles.noteTitle}>{item.title}</Text>
-            <Text style={styles.noteContent} numberOfLines={2}>
-              {item.content}
-            </Text>
-          </TouchableOpacity>
-        )}
+        renderItem={({ item }) => {
+          // Extract clean preview from content
+          let previewText = item.content;
+
+          // If content contains URL badge markers, extract the title from the first badge
+          const badgeMatch = item.content.match(/\[\[URL_BADGE:(\{[^\]]+\})\]\]/);
+          if (badgeMatch) {
+            try {
+              const badgeData = JSON.parse(badgeMatch[1]);
+              previewText = `🔗 ${badgeData.title || badgeData.url}`;
+            } catch (e) {
+              previewText = '🔗 Link';
+            }
+          } else if (previewText.length > 100) {
+            previewText = previewText.substring(0, 100) + '...';
+          }
+
+          return (
+            <TouchableOpacity
+              style={styles.noteCard}
+              onPress={() => navigation.navigate('NoteDetail', { note: item })}
+            >
+              <Text style={styles.noteTitle}>{item.title}</Text>
+              <Text style={styles.noteContent} numberOfLines={2}>
+                {previewText}
+              </Text>
+            </TouchableOpacity>
+          );
+        }}
       />
 
       <TouchableOpacity
